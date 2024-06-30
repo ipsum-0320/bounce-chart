@@ -8,7 +8,8 @@ import {
   ToolboxComponent,
   TooltipComponent,
   GridComponent,
-  LegendComponent
+  LegendComponent,
+  DataZoomComponent
 } from 'echarts/components';
 import { LineChart } from 'echarts/charts';
 import { UniversalTransition } from 'echarts/features';
@@ -29,19 +30,23 @@ echarts.use([
   LegendComponent,
   LineChart,
   CanvasRenderer,
-  UniversalTransition
+  UniversalTransition,
+  DataZoomComponent
 ]);
 
 const disabledDate = (current) => {
   return current && current < dayjs('2024-05-15').endOf('day');
 };
 
-const messageKey = "REQUEST";
-
 function App() {
   const correlationContainer = useRef();
   const [messageApi, contextHolder] = message.useMessage();
   const [isRequest, setRequest] = useState(false);
+  const [refresh, setRefresh] = useState(0);
+
+  const [T, setT] = useState(null);
+  const [B, setB] = useState(null);
+  const [time, setTime] = useState(null);
 
   function okFunc(value) {
     if (value[0] == null || value[1] == null || isRequest) return
@@ -55,9 +60,9 @@ function App() {
     }
   
     messageApi.open({
-      messageKey,
       type: 'loading',
       content: '正在请求中...',
+      duration: 999,
     });
     
     setRequest(true)
@@ -65,19 +70,22 @@ function App() {
       params: query
     })
     .then(response => {
+      messageApi.destroy()
       setRequest(false)
       messageApi.open({
-        messageKey,
         type: 'success',
         content: '请求成功!',
         duration: 2,
       });
-      console.log(response)
+      setT(response.data.data['true_ins'])
+      setB(response.data.data['bounce_ins'])
+      setTime(response.data.data['date'])
+      setRefresh(refresh + 1)
     })
     .catch(error => {
+      messageApi.destroy()
       setRequest(false)
       messageApi.open({
-        messageKey,
         type: 'error',
         content: '请求失败，打开控制台查看原因!',
         duration: 2,
@@ -86,78 +94,10 @@ function App() {
     });
   }
 
-
-  let option = {
-    title: {
-      text: '真实值与弹性预测值对比图'
-    },
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: {
-        type: 'cross',
-        label: {
-          backgroundColor: '#6a7985'
-        }
-      }
-    },
-    legend: {
-      data: ['true', 'bounce-predict']
-    },
-    toolbox: {
-      feature: {
-        saveAsImage: {}
-      }
-    },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      containLabel: true
-    },
-    xAxis: [
-      {
-        type: 'category',
-        boundaryGap: false,
-        data: null // TODO
-      }
-    ],
-    yAxis: [
-      {
-        type: 'value'
-      }
-    ],
-    series: [
-      {
-        name: 'true',
-        type: 'line',
-        stack: 'Total',
-        areaStyle: {},
-        emphasis: {
-          focus: 'series'
-        },
-        data: [320, 332, 301, 334, 390, 330, 320]
-      },
-      {
-        name: 'bounce-predict',
-        type: 'line',
-        stack: 'Total',
-        label: {
-          show: true,
-          position: 'top'
-        },
-        areaStyle: {},
-        emphasis: {
-          focus: 'series'
-        },
-        data: [820, 932, 901, 934, 1290, 1330, 1320]
-      }
-    ]
-  };
-
   useEffect(() => {
-    // const chart = echarts.init(correlationContainer.current, "dark");
-    // chart.setOption(option);
-  }, [option])
+    const chart = echarts.init(correlationContainer.current, "dark");
+    chart.setOption(getOption(time, T, B));
+  }, [refresh])
 
   return (
     <div className={styles.app}>
@@ -181,6 +121,84 @@ function App() {
       </div>
     </div>
   );
+}
+
+function getOption(time, T, B) {
+  let option = {
+    title: {
+      text: '真实值与弹性预测值对比图'
+    },
+    dataZoom: [
+      {
+        type: 'inside'
+      },
+      {
+        type: 'slider'
+      }
+    ],
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'cross',
+        label: {
+          backgroundColor: '#6a7985'
+        }
+      }
+    },
+    legend: {
+      data: ['true', 'bounce-predict']
+    },
+    toolbox: {
+      feature: {
+        saveAsImage: {}
+      }
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '60px',
+      containLabel: true
+    },
+    xAxis: [
+      {
+        type: 'category',
+        boundaryGap: false,
+        data: time,
+      }
+    ],
+    yAxis: [
+      {
+        type: 'value'
+      }
+    ],
+    series: [
+      {
+        name: 'true',
+        type: 'line',
+        stack: 'Total',
+        areaStyle: {},
+        emphasis: {
+          focus: 'series'
+        },
+        data: T,
+      },
+      {
+        name: 'bounce-predict',
+        type: 'line',
+        stack: 'Total',
+        label: {
+          show: true,
+          position: 'top'
+        },
+        areaStyle: {},
+        emphasis: {
+          focus: 'series'
+        },
+        data: B,
+      }
+    ]
+  };
+  return option;
 }
 
 export default App;
