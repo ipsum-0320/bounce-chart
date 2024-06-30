@@ -1,0 +1,57 @@
+.app {
+  background-color: aqua;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  width: 80%;
+  height: 80%;
+  overflow: hidden;
+  background-color: #e6e2c3;
+  box-sizing: border-box;
+  border-radius: 20px;
+  border: 5px solid rgb(3, 122, 75);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  position: relative;
+}
+
+.chart {
+  width: 60%;
+  height: 80%;
+}
+
+.picker {
+  width: 30%;
+  height: 80%;
+}
+
+.picker {
+  :global(.ant-picker) {
+    width: 100%;
+    box-sizing: border-box;
+    border-width: 3px;
+  }
+  position: relative;
+}
+
+.metrics {
+  position: absolute;
+  bottom: 110px;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.save {
+  margin-top: 20px;
+}
