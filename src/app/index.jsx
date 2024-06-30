@@ -38,11 +38,15 @@ const disabledDate = (current) => {
   return current && current < dayjs('2024-05-15').endOf('day');
 };
 
+const total = 1210 / 6;
+
 function App() {
   const correlationContainer = useRef();
   const [messageApi, contextHolder] = message.useMessage();
   const [isRequest, setRequest] = useState(false);
   const [refresh, setRefresh] = useState(0);
+  const [bingo, setBingo] = useState(0);
+  const [save, setSave] = useState(0);
 
   const [T, setT] = useState(null);
   const [B, setB] = useState(null);
@@ -77,6 +81,20 @@ function App() {
         content: '请求成功!',
         duration: 2,
       });
+
+      let bingoNum = 0;
+      let predSum = 0;
+      const L = response.data.data['true_ins'].length
+
+      for (let i = 0; i < L; i++) {
+        if (response.data.data['bounce_ins'][i] >= response.data.data['true_ins'][i]) {
+          bingoNum += 1
+        }
+        predSum += response.data.data['bounce_ins'][i]
+      }
+
+      setBingo(Math.round(10000 * (bingoNum / L)) / 100)
+      setSave(Math.round(10000 * (1 - ((predSum / L) / total))) / 100)
       setT(response.data.data['true_ins'])
       setB(response.data.data['bounce_ins'])
       setTime(response.data.data['date'])
@@ -114,8 +132,8 @@ function App() {
             onOk={okFunc}
           />
           <div className={styles.metrics}>
-            <div className={styles.bingo}>充足率: {100}%</div>
-            <div className={styles.save}>节约率: {50}%</div>
+            <div className={styles.bingo}>充足率: {bingo}%</div>
+            <div className={styles.save}>节约率: {save}%</div>
           </div>
         </div>
       </div>
