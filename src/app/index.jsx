@@ -192,19 +192,8 @@ function getOption(time, T, B) {
     ],
     series: [
       {
-        name: 'true',
-        type: 'line',
-        stack: 'Total',
-        areaStyle: {},
-        emphasis: {
-          focus: 'series'
-        },
-        data: T,
-      },
-      {
         name: 'bounce-predict',
         type: 'line',
-        stack: 'Total',
         label: {
           show: true,
           position: 'top'
@@ -214,6 +203,15 @@ function getOption(time, T, B) {
           focus: 'series'
         },
         data: B,
+      },
+      {
+        name: 'true',
+        type: 'line',
+        areaStyle: {},
+        emphasis: {
+          focus: 'series'
+        },
+        data: T,
       }
     ]
   };
