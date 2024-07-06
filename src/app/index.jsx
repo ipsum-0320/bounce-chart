@@ -55,7 +55,7 @@ function App() {
   function okFunc(value) {
     if (value[0] == null || value[1] == null || isRequest) return
   
-    const url = "http://localhost:6666/bounce/rate";
+    const url = "http://10.10.103.51:31365/bounce/rate";
     // TODO
     const start = dayjs(value[0].$d).format('YYYY-MM-DD HH:mm:ss');
     const end = dayjs(value[1].$d).format('YYYY-MM-DD HH:mm:ss');
